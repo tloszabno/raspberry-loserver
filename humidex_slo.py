@@ -20,6 +20,15 @@ class HumidexData(object):
         return "%s -> in:%s out:%s" % (
             str(self.timestamp), str(self.indoor_data), str(self.outdoor_data))
 
+    def to_csv(self):
+        return "%s,%s,%s,%s,%s" % (
+            str(self.timestamp),
+            str(self.indoor_data[0]),
+            str(self.indoor_data[1]),
+            str(self.outdoor_data[0]),
+            str(self.outdoor_data[1])
+        )
+
 
 class HumidexUpdator(threading.Thread):
     def __init__(self, slo):
@@ -31,6 +40,10 @@ class HumidexUpdator(threading.Thread):
         schedule.every(
             config.INTERVAL_SQUEEZE_HUMID_FROM_SHALLOW_CACHE_H).hours.do(
                 slo.squeeze_shallow_cache_to_avg)
+        schedule.every(
+            config.INTERVAL_FLUSH_CACHE_TO_DB_H).hours.do(
+                slo.flush_cache_to_db
+            )
         self.start()
 
     def run(self):
@@ -45,17 +58,26 @@ class HumidexSLO(object):
         self.avg_cache = []
         self.shallow_cache = []
         self.lock = threading.RLock()
-        self.fetch_current_humidex_from_sensors()
-        self.updator.join()
+        self.once_flushed = False
+        utils.execute_async(self.fetch_current_humidex_from_sensors)
+
+    def get_last(self):
+        # TODO: lock needed relly?
+        with self.lock:
+            if len(self.shallow_cache) > 0:
+                return self.shallow_cache[-1]
+            elif len(self.avg_cache) > 0:
+                return self.avg_cache[-1]
+            return None
 
     def fetch_current_humidex_from_sensors(self):
+        data_indoor = get_humidex_indoor()
+        data_outdoor = get_humidex_outdoor()
         with self.lock:
-            data_indoor = get_humidex_indoor()
-            data_outdoor = get_humidex_outdoor()
             self.shallow_cache.append(
                 HumidexData(
                     indoor_data=data_indoor, outdoor_data=data_outdoor))
-        self.print_shallow()
+        # self.print_shallow()
 
     @utils.timed
     def squeeze_shallow_cache_to_avg(self):
@@ -73,21 +95,38 @@ class HumidexSLO(object):
                     (in_temp_avg, in_humi_avg), (out_temp_avg, out_humi_avg))
                 avg.timestamp = self.shallow_cache[-1].timestamp
                 self.avg_cache.append(avg)
-        self.print_avg_cache()
+                del self.shallow_cache[:]
+        # self.print_avg_cache()
+
+    @utils.timed
+    def flush_cache_to_db(self):
+        with self.lock:
+            with open(config.DB_FILE_PATH, "a+") as f:
+                to_write = self.avg_cache[1:] \
+                    if self.once_flushed else self.avg_cache
+                for entry in to_write:
+                    f.write(entry.to_csv())
+                    f.write('\n')
+            if len(self.avg_cache) > 0:
+                self.avg_cache[0] = self.avg_cache[-1]
+            self.avg_cache[1:] = []
+            self.once_flushed = True
 
     def print_shallow(self):
+        print("shallow->")
         with self.lock:
             for el in self.shallow_cache:
                 print(str(el))
 
     def print_avg_cache(self):
+        print("avg->")
         with self.lock:
             for el in self.avg_cache:
                 print(str(el))
 
 
 def test():
-    h = HumidexSLO()
+    HumidexSLO()
 
 
 if __name__ == '__main__':

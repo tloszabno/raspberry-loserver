@@ -1,4 +1,5 @@
 import time
+from threading import Thread
 
 
 def timed(func):
@@ -13,4 +14,11 @@ def timed(func):
 
 
 def avg(l):
-    sum(l) / float(len(l))
+    l = [x for x in l if x]  # filter NoneTypes
+    return sum(l) / float(len(l))
+
+
+def execute_async(action):
+    t = Thread(target=action)
+    t.daemon = True
+    t.start()
