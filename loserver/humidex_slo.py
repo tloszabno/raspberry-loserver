@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from devices import get_humidex_indoor
-from devices import get_humidex_outdoor
 import schedule
 import config
 import threading
@@ -53,8 +51,9 @@ class HumidexUpdator(threading.Thread):
 
 
 class HumidexSLO(object):
-    def __init__(self):
+    def __init__(self, humidexDevicesFacade):
         self.updator = HumidexUpdator(self)
+        self.humidex_devices_facade = humidexDevicesFacade
         self.avg_cache = []
         self.shallow_cache = []
         self.lock = threading.RLock()
@@ -71,13 +70,13 @@ class HumidexSLO(object):
             return None
 
     def fetch_current_humidex_from_sensors(self):
-        data_indoor = get_humidex_indoor()
-        data_outdoor = get_humidex_outdoor()
+        data_indoor = self.humidex_devices_facade.get_humidex_indoor()
+        data_outdoor = self.humidex_devices_facade.get_humidex_outdoor()
         with self.lock:
             self.shallow_cache.append(
                 HumidexData(
                     indoor_data=data_indoor, outdoor_data=data_outdoor))
-        # self.print_shallow()
+        self.print_shallow()
 
     @utils.timed
     def squeeze_shallow_cache_to_avg(self):
@@ -96,7 +95,7 @@ class HumidexSLO(object):
                 avg.timestamp = self.shallow_cache[-1].timestamp
                 self.avg_cache.append(avg)
                 del self.shallow_cache[:]
-        # self.print_avg_cache()
+        self.print_avg_cache()
 
     @utils.timed
     def flush_cache_to_db(self):

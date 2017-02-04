@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 from humidex_slo import HumidexSLO
+from devices import HumidexDevicesFacade
 import flask
 from flask import Flask
 app = Flask(__name__)
 
-humidex = HumidexSLO()
+humidexDevicesFacade = HumidexDevicesFacade()
+humidex = HumidexSLO(humidexDevicesFacade)
 
 
 @app.route("/")
