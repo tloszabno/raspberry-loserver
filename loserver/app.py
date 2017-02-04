@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
 from humidex_slo import HumidexSLO
+from humidex_db import HumidexDB
 from devices import HumidexDevicesFacade
 import flask
 from flask import Flask
 app = Flask(__name__)
 
 humidexDevicesFacade = HumidexDevicesFacade()
-humidex = HumidexSLO(humidexDevicesFacade)
+humidexDB = HumidexDB()
+humidex = HumidexSLO(humidexDevicesFacade, humidexDB)
 
 
 @app.route("/")
@@ -23,7 +25,7 @@ def temp():
     response = {
         "out_temp": str(data.outdoor_data[0]),
         "out_humid": str(data.outdoor_data[1]),
-        "in_temp": str(data.indoor_data[0]),
+        "int_temp": str(data.indoor_data[0]),
         "int_humid": str(data.indoor_data[1]),
         "timestamp": str(data.timestamp)
     }

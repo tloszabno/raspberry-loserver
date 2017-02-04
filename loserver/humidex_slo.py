@@ -51,9 +51,10 @@ class HumidexUpdator(threading.Thread):
 
 
 class HumidexSLO(object):
-    def __init__(self, humidexDevicesFacade):
+    def __init__(self, humidexDevicesFacade, humidexDb):
         self.updator = HumidexUpdator(self)
         self.humidex_devices_facade = humidexDevicesFacade
+        self.humidex_db = humidexDb
         self.avg_cache = []
         self.shallow_cache = []
         self.lock = threading.RLock()
@@ -76,9 +77,9 @@ class HumidexSLO(object):
             self.shallow_cache.append(
                 HumidexData(
                     indoor_data=data_indoor, outdoor_data=data_outdoor))
-        self.print_shallow()
+        # self.print_shallow()
 
-    @utils.timed
+    # @utils.timed
     def squeeze_shallow_cache_to_avg(self):
         with self.lock:
             if len(self.shallow_cache) > 0:
@@ -95,17 +96,16 @@ class HumidexSLO(object):
                 avg.timestamp = self.shallow_cache[-1].timestamp
                 self.avg_cache.append(avg)
                 del self.shallow_cache[:]
-        self.print_avg_cache()
+        # self.print_avg_cache()
 
-    @utils.timed
+    # @utils.timed
     def flush_cache_to_db(self):
         with self.lock:
-            with open(config.DB_FILE_PATH, "a+") as f:
-                to_write = self.avg_cache[1:] \
-                    if self.once_flushed else self.avg_cache
-                for entry in to_write:
-                    f.write(entry.to_csv())
-                    f.write('\n')
+            to_write = self.avg_cache[1:] \
+                if self.once_flushed else self.avg_cache[:]  # copy
+            print(str(self.avg_cache))
+            print(str(to_write))
+            self.humidex_db.append_entries(to_write)
             if len(self.avg_cache) > 0:
                 self.avg_cache[0] = self.avg_cache[-1]
             self.avg_cache[1:] = []
