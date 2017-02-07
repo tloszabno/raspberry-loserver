@@ -2,6 +2,7 @@
 from subprocess import check_output
 from utils import timed
 from config import ADAFRUIT_LIB_PATH
+import traceback
 
 TEMPERATURE_OUTDOOR_PIN = 6
 TEMPERATURE_INDOOR_PIN = 12
@@ -10,7 +11,13 @@ TEMPERATURE_INDOOR_PIN = 12
 class HumidexDevicesFacade(object):
     def __get_temp_and_humidity__(self, outdoor=False):
         pin = TEMPERATURE_OUTDOOR_PIN if outdoor else TEMPERATURE_INDOOR_PIN
-        out = check_output([ADAFRUIT_LIB_PATH, "2302", str(pin)])
+
+        for _ in range(3):
+            try:
+                out = check_output([ADAFRUIT_LIB_PATH, "2302", str(pin)])
+                break
+            except:
+                print(str(traceback.format_exc()))
         temp_str, humid_str = out.split()
         temp_str = temp_str.split("=")[1][:-1]
         humid_str = humid_str.split("=")[1][:-1]

@@ -14,8 +14,8 @@ def timed(func):
 
 
 def avg(l):
-    l = [x for x in l if x]  # filter NoneTypes
-    return sum(l) / float(len(l))
+    l = [x for x in l if x is not None]  # filter NoneTypes
+    return sum(l) / float(len(l)) if len(l) > 0 else 0.0
 
 
 def execute_async(action):

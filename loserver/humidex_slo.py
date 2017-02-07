@@ -6,13 +6,23 @@ import threading
 import time
 import datetime
 import utils
+from multiprocessing.pool import ThreadPool
 
 
-class HumidexData(object):
-    def __init__(self, indoor_data, outdoor_data):
-        self.indoor_data = indoor_data
-        self.outdoor_data = outdoor_data
-        self.timestamp = datetime.datetime.now()
+class HumidexData(object):  # TODO: move to separated module
+    def __init__(self, indoor_data=None, outdoor_data=None, csv=None):
+        if csv:
+            entries = csv.split(",")
+            if len(entries) != 5:
+                raise Exception("Wrong format for given csv " + str(csv))
+            self.timestamp = datetime.datetime.strptime(
+                entries[0], "%Y-%m-%d %H:%M:%S.%f")
+            self.indoor_data = (float(entries[1]), float(entries[2]))
+            self.outdoor_data = (float(entries[3]), float(entries[4]))
+        else:
+            self.indoor_data = indoor_data
+            self.outdoor_data = outdoor_data
+            self.timestamp = datetime.datetime.now()
 
     def __str__(self):
         return "%s -> in:%s out:%s" % (
@@ -26,6 +36,15 @@ class HumidexData(object):
             str(self.outdoor_data[0]),
             str(self.outdoor_data[1])
         )
+
+    def to_json(self):
+        return {
+            "out_temp": str(self.outdoor_data[0]),
+            "out_humid": str(self.outdoor_data[1]),
+            "int_temp": str(self.indoor_data[0]),
+            "int_humid": str(self.indoor_data[1]),
+            "timestamp": str(self.timestamp)
+        }
 
 
 class HumidexUpdator(threading.Thread):
@@ -52,6 +71,8 @@ class HumidexUpdator(threading.Thread):
 
 class HumidexSLO(object):
     def __init__(self, humidexDevicesFacade, humidexDb):
+        print("creating")
+        self.workers_pool = ThreadPool(processes=2)
         self.updator = HumidexUpdator(self)
         self.humidex_devices_facade = humidexDevicesFacade
         self.humidex_db = humidexDb
@@ -59,7 +80,7 @@ class HumidexSLO(object):
         self.shallow_cache = []
         self.lock = threading.RLock()
         self.once_flushed = False
-        utils.execute_async(self.fetch_current_humidex_from_sensors)
+        self.fetch_current_humidex_from_sensors()
 
     def get_last(self):
         # TODO: lock needed relly?
@@ -70,16 +91,33 @@ class HumidexSLO(object):
                 return self.avg_cache[-1]
             return None
 
+    def get_last_24h(self):
+        max_last_entries_number = \
+            int(24 / config.INTERVAL_SQUEEZE_HUMID_FROM_SHALLOW_CACHE_H)
+
+        shallow = self.shallow_cache
+        shallow.reverse()
+        avg = self.avg_cache
+        avg.reverse()
+        local_and_db = shallow + avg \
+            + self.humidex_db.read_db(max_last_entries_number)
+        data_24h_min = datetime.datetime.now() - datetime.timedelta(hours=24)
+        return filter(lambda x: x.timestamp > data_24h_min, local_and_db)
+
     def fetch_current_humidex_from_sensors(self):
-        data_indoor = self.humidex_devices_facade.get_humidex_indoor()
-        data_outdoor = self.humidex_devices_facade.get_humidex_outdoor()
+        async_out_data = self.workers_pool.apply_async(
+            self.humidex_devices_facade.get_humidex_outdoor, ())
+        async_in_data = self.workers_pool.apply_async(
+            self.humidex_devices_facade.get_humidex_indoor, ())
+        data_outdoor = async_out_data.get()
+        data_indoor = async_in_data.get()
         with self.lock:
             self.shallow_cache.append(
                 HumidexData(
                     indoor_data=data_indoor, outdoor_data=data_outdoor))
-        # self.print_shallow()
+        self.print_shallow()
 
-    # @utils.timed
+    @utils.timed
     def squeeze_shallow_cache_to_avg(self):
         with self.lock:
             if len(self.shallow_cache) > 0:
@@ -95,21 +133,19 @@ class HumidexSLO(object):
                     (in_temp_avg, in_humi_avg), (out_temp_avg, out_humi_avg))
                 avg.timestamp = self.shallow_cache[-1].timestamp
                 self.avg_cache.append(avg)
-                del self.shallow_cache[:]
-        # self.print_avg_cache()
+                self.shallow_cache = []
+        self.print_avg_cache()
 
-    # @utils.timed
+    @utils.timed
     def flush_cache_to_db(self):
         with self.lock:
-            to_write = self.avg_cache[1:] \
-                if self.once_flushed else self.avg_cache[:]  # copy
-            print(str(self.avg_cache))
-            print(str(to_write))
-            self.humidex_db.append_entries(to_write)
             if len(self.avg_cache) > 0:
-                self.avg_cache[0] = self.avg_cache[-1]
-            self.avg_cache[1:] = []
-            self.once_flushed = True
+                to_write = self.avg_cache[1:] \
+                    if self.once_flushed else self.avg_cache[:]
+                self.humidex_db.append_entries(to_write)
+                self.once_flushed = True
+                last_el = self.avg_cache[-1]
+                self.avg_cache = [last_el]
 
     def print_shallow(self):
         print("shallow->")

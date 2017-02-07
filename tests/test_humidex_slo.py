@@ -5,7 +5,7 @@ from loserver import humidex_slo
 from matchers import is_sorted_by_timestamp
 
 
-class TestHumidexSLO_shallow_cache(unittest.TestCase):
+class TestHumidexSLO(unittest.TestCase):
     """
         Mocked humidex sensor will return
         in:  (15.0, 65.0), (16.0, 66.0), (17.0, 67.0) .... (35.0, 85.0)
@@ -140,6 +140,34 @@ class TestHumidexSLO_shallow_cache(unittest.TestCase):
         assert_that(len(humidex.avg_cache), equal_to(1))
         assert_that(humidex.avg_cache[0].indoor_data[0], equal_to(32.0))
         assert_that(given_to_write[5].indoor_data[0], equal_to(32.0))
+
+    def test_squeeze_works_with_one_value_in_shallow(self):
+        # given
+        humidex = humidex_slo.HumidexSLO(
+            self.humidexDevicesFacade, self.humidex_db)
+        humidex.fetch_current_humidex_from_sensors()
+        # when
+        humidex.squeeze_shallow_cache_to_avg()
+        # then
+        assert_that(len(humidex.avg_cache), equal_to(1))
+
+    def test_multiple_flushes(self):
+        # given
+        humidex = humidex_slo.HumidexSLO(
+            self.humidexDevicesFacade, self.humidex_db)
+        for _ in range(6):
+            for _ in range(3):
+                humidex.fetch_current_humidex_from_sensors()
+                humidex.print_shallow()
+                humidex.print_avg_cache()
+                humidex.squeeze_shallow_cache_to_avg()
+            humidex.flush_cache_to_db()
+        humidex.flush_cache_to_db()
+
+        # then
+        given_to_write = self.humidex_db.to_write
+        assert_that(len(given_to_write), equal_to(18))
+        assert_that(given_to_write, is_(is_sorted_by_timestamp()))
 
     #
     #
