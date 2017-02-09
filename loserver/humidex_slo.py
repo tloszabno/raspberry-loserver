@@ -23,10 +23,15 @@ class HumidexData(object):  # TODO: move to separated module
             self.indoor_data = indoor_data
             self.outdoor_data = outdoor_data
             self.timestamp = datetime.datetime.now()
+        self.init_states()
 
     def __str__(self):
         return "%s -> in:%s out:%s" % (
             str(self.timestamp), str(self.indoor_data), str(self.outdoor_data))
+
+    def init_states(self):
+        # add info if temp is mid - low - high etc
+        pass
 
     def to_csv(self):
         return "%s,%s,%s,%s,%s" % (
@@ -39,11 +44,11 @@ class HumidexData(object):  # TODO: move to separated module
 
     def to_json(self):
         return {
-            "out_temp": str(self.outdoor_data[0]),
-            "out_humid": str(self.outdoor_data[1]),
-            "int_temp": str(self.indoor_data[0]),
-            "int_humid": str(self.indoor_data[1]),
-            "timestamp": str(self.timestamp)
+            "out_temp": "%.1f" % self.outdoor_data[0],
+            "out_humid": "%.f" % self.outdoor_data[1],
+            "int_temp": "%.1f" % self.indoor_data[0],
+            "int_humid": "%.0f" % self.indoor_data[1],
+            "timestamp": self.timestamp.strftime('%Y-%m-%d %H:%M')
         }
 
 

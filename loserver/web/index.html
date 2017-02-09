@@ -1,0 +1,122 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<style>
+.humidex-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    color: #fff;
+    display: inline-block;
+}
+.humidex-element{
+    text-align: center;
+    display: block;
+    position: relative;
+}
+.humidex-temperature{
+    font-size: 44px;
+    top: 30px;
+}
+.humidex-humidity{
+    font-size: 24px;
+    top: 50px;
+}
+.humidex-place{
+    font-size: 24px;
+    top: 20px;
+}
+.humidex-in{
+    background: #d9534f;
+}
+.humidex-out{
+    background: #5cb85c;
+}
+.update-info{
+    display: block;
+    margin-top: 10px;
+    width: 400px;
+    text-align: center;
+}
+.day-info{
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 400px;
+    text-align: center;
+}
+</style>
+<div id="losite">
+
+    <div id="mainSlides" class="carousel slide" data-ride="carousel">
+        <!-- Wrapper for slides -->
+
+        <div class="carousel-inner" role="listbox">
+            <div class="item active">
+                <span class="day-info bg-info">
+                    Day info ...
+                </span>
+
+                <div c  lass="humidex_box">
+                    <div>
+                        <div class="humidex-circle humidex-in">
+                            <span class="humidex-element humidex-place">
+                                w domu
+                            </span>
+                            <span class="humidex-element humidex-temperature">
+                                {{ humidex.int_temp }} 'C
+                            </span>
+                            <span class="humidex-element humidex-humidity">
+                                {{ humidex.int_humid }} %
+                            </span>
+                        </div>
+                        <div class="humidex-circle humidex-out">
+                            <span class="humidex-element humidex-place">
+                                Na polu
+                            </span>
+                            <span class="humidex-element humidex-temperature">
+                                {{ humidex.out_temp }} 'C
+                            </span>
+                            <span class="humidex-element humidex-humidity">
+                                {{ humidex.out_humid }} %
+                            </span>
+                        </div>
+
+                        <span class="bg-primary update-info">
+                            {{ humidex.timestamp }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="item">
+            blas
+        </div> -->
+    </div>
+
+    <!-- Left and right controls -->
+    <!-- <a class="left carousel-control" href="#mainSlides" role="button" data-slide="prev">
+    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+</a>
+<a class="right carousel-control" href="#mainSlides" role="button" data-slide="next">
+<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+<span class="sr-only">Next</span>
+</a> -->
+
+
+</div>
+
+</div>
+
+</body>
+
+<script src="js/jquery-3.1.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/vue.min.js"></script>
+<script src="js/main.js"></script>
+</html>

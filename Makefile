@@ -9,12 +9,17 @@ init2:
 test:
 	nosetests
 
+test2:
+	nosetests-2.7
+
+
 run:
 	sudo python2 loserver/app.py
 
 
 run-mocked:
 	sudo python2 loserver/app.py --mocked
+
 
 clean:
 	find . -name "*.pyc" -exec rm -rf {} \;
