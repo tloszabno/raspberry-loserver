@@ -64,4 +64,4 @@ def init(use_mocks):
 if __name__ == '__main__':
     use_mocks = len(sys.argv) > 1 and sys.argv[1] == "--mocked"
     init(use_mocks)
-    app.run(host='0.0.0.0', port=81, debug=False)
+    app.run(host='0.0.0.0', port=81, debug=True)

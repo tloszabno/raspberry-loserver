@@ -25,4 +25,7 @@ clean:
 	find . -name "*.pyc" -exec rm -rf {} \;
 
 
+kill:
+	sudo kill -9 `ps aux | grep app | grep -v grep | awk '{print $2}'`
+
 .PHONY: init test clean

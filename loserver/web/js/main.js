@@ -3,10 +3,14 @@ var app = new Vue({
     data: {
         message: "bla",
         humidex: {},
+        current_date: "10.02.17",
+        current_time: "19:25",
+        day_messages: ["Imieniny Taty", "Urodziny Mamy"],
         errors: []
     },
     mounted: function() {
         this.fetch();
+        hideAddressBar();
     },
     methods: {
         fetch: function() {
