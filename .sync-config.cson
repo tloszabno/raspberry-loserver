@@ -1,10 +1,10 @@
 remote:
   host: "192.168.0.36"
   user: "osmc"
-  path: "loserver"
+  path: "raspberry-loserver"
   port: "22"
 behaviour:
-  uploadOnSave: false
+  uploadOnSave: true
   syncDownOnOpen: true
   forgetConsole: false
   autoHideConsole: true

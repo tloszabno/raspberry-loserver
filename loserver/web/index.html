@@ -3,124 +3,30 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="web/css/bootstrap.min.css" rel="stylesheet">
+    <link href="web/css/styles.css" rel="stylesheet">
 </head>
 <body>
 <style>
 
-body{
-    background-color: #212121;
-    height: 400px;
-}
-.lo-widgets-grid{
-    display: table;
-    width: 100%;
-    height: 80%;
-    padding-top: 20px;
-    table-layout: fixed;
-    border-spacing: 10px;
-}
-.lo-widget{
-    background-color: #303030;
-    color: #CFD8DC;
-    display: inline-block;
-    margin: auto;
-    width: 200px;
-    height: 225px;
-    vertical-align: middle;
-    border-radius: 10px;
-    border: 5px solid #263238;
-    display: table-cell;
-}
-.lo-widget .lo-top-row{
-    font-size: 1.25em;
-    display: block;
-    text-align: left;
-    min-height: 40px;
-    position: relative;
-}
-.lo-widget .lo-top-row span{
-    position: absolute;
-    bottom: 2px;
-    left: 12px;
-    padding: 2px;
-    margin: auto;
-}
-
-.lo-widget .lo-center-row{
-    font-size: 3.6em;
-    font-weight: bold;
-    display: block;
-    background-color: #424242;
-    padding: 5px;
-    text-align: center;
-}
-
-.lo-widget .lo-center-row span{
-    vertical-align: middle;
-}
-
-.lo-widget .lo-bottom-row{
-    font-size: 0.85em;
-    display: block;
-    text-align: left;
-    min-height: 60px;
-    position: relative;
-    margin-top: 4px;
-}
-.lo-widget .lo-bottom-row span{
-    position: absolute;
-    left: 12px;
-    margin-top: 10px;
-    padding: 2px;
-}
-.lo-widget .lo-bottom-row span ul {
-    font-size: 1.2em;
-    margin:0;
-    padding:0 0 0.5em 1.2em;
-}
-
-.lo-widget .lo-bottom-row .lo-humidity{
-    font-size: 2.5em;
-    display: block;
-    min-height: 40px;
-    position: absolute;
-    left: 12px;
-    padding: 2px;
-    margin: auto;
-}
-
-.lo-widget .lo-bottom-row .lo-humidex-timestamp{
-    font-size: 1em;
-    display: block;
-    position: absolute;
-    bottom: 0px;
-    left: 12px;
-    padding: 2px;
-    margin: auto;
-}
-.addressbar{
-    height: 50px;
-    border-color: red;
-}
 </style>
-<div id="losite">
+<div id="losite" v-cloak>
 
     <div class="lo-widgets-grid">
 
         <div class="lo-widget">
             <span class="lo-top-row">
-                <span>{{current_date}}</span>
+                <span>{{day_info.date}}</span>
             </span>
             <span class="lo-center-row">
                 <span>
-                    {{current_time}}
+                    {{day_info.time}}
                 </span>
             </span>
             <span class="lo-bottom-row">
                 <span>
                     <ul>
-                        <li v-for="msg in day_messages">{{msg}}</li>
+                        <li v-for="msg in day_info.messages">{{msg}}</li>
                     </ul>
                 </span>
             </span>
@@ -150,8 +56,8 @@ body{
 
 </body>
 
-<script src="js/jquery-3.1.1.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/vue.min.js"></script>
-<script src="js/main.js"></script>
+<script src="web/js/jquery-3.1.1.min.js"></script>
+<script src="web/js/bootstrap.min.js"></script>
+<script src="web/js/vue.min.js"></script>
+<script src="web/js/main.js"></script>
 </html>

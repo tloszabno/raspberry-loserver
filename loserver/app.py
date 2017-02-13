@@ -3,6 +3,7 @@
 from humidex_slo import HumidexSLO
 from humidex_db import HumidexDB
 from humidex_web import HumidexWeb
+from day_info_web import DayInfoWeb
 from flask import Flask, send_from_directory
 from web import Response
 import flask
@@ -10,6 +11,7 @@ import sys
 app = Flask(__name__, static_folder='web')
 
 humidex = None
+day_info = None
 
 
 @app.route('/humidex_info')
@@ -19,6 +21,10 @@ def get_humidex_info():
         return flask.jsonify(Response(ok=False, errors=['No data found']))
     return flask.jsonify(Response(data=data.to_json()))
 
+
+@app.route('/day_info')
+def get_day_info():
+    return flask.jsonify(Response(data=day_info.get_day_info()))
 
 # @app.route('/temp_24h')
 # def last_temp_24h():
@@ -44,7 +50,7 @@ def send_css(path):
 
 
 def init(use_mocks):
-    global humidex
+    global humidex, day_info
     if humidex is not None:
         return
     humidexDevicesFacade = None
@@ -59,9 +65,10 @@ def init(use_mocks):
     humidexDB = HumidexDB()
     humidexSLO = HumidexSLO(humidexDevicesFacade, humidexDB)
     humidex = HumidexWeb(humidexSLO)
+    day_info = DayInfoWeb()
 
 
 if __name__ == '__main__':
     use_mocks = len(sys.argv) > 1 and sys.argv[1] == "--mocked"
     init(use_mocks)
-    app.run(host='0.0.0.0', port=81, debug=True)
+    app.run(host='0.0.0.0', port=81, debug=use_mocks)
