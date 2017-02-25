@@ -8,23 +8,26 @@ body{
 .lo-widgets-grid{
     display: table;
     width: 100%;
-    height: 80%;
-    padding-top: 20px;
+    height: 90%;
+    padding-top: 5px;
     table-layout: fixed;
     border-spacing: 10px;
+    max-height:350px;
 }
 .lo-widget{
     background-color: #303030;
     color: #CFD8DC;
-    display: inline-block;
     margin: auto;
     width: 200px;
     height: 225px;
-    vertical-align: middle;
     border-radius: 10px;
     border: 5px solid #263238;
     display: table-cell;
 }
+.lo-widget-middle{
+    vertical-align: middle;
+}
+
 .lo-widget .lo-top-row{
     font-size: 1.25em;
     display: block;

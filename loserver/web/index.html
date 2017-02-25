@@ -8,13 +8,80 @@
 </head>
 <body>
 <style>
+.lo-widget .lo-widget-title{
+    vertical-align: top;
+    background-color: #424242;
+    display: block;
+    border-radius: 5px;
+    padding: 4px;
+    font-size: 1.2em;
+    text-align: left;
+    margin: 5px;
+    font-weight: bold;
+    overflow: hidden;
+}
+.lo-widget .lo-widget-content-list{
+    display: block;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 5px;
+    font-size: 1.2em;
+    height: 80%;
+    overflow-y: auto;
+}
+.table-striped>tbody>tr:nth-child(odd)>td,
+.table-striped>tbody>tr:nth-child(odd)>th {
+   background-color: #263238;
+ }
 
+ .table-striped>tbody>tr:nth-child(even)>td,
+ .table-striped>tbody>tr:nth-child(even)>th {
+    background-color: #37474F;
+  }
+.table-striped>tbody>tr>td{
+    color: #CFD8DC;
+    border-top:none;
+}
 </style>
 <div id="losite" v-cloak>
-
     <div class="lo-widgets-grid">
-
         <div class="lo-widget">
+            <span class="lo-widget-title">
+                Today
+            </span>
+            <span class="lo-widget-content-list">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr v-for="task in wunder_today.list">
+                            <td>
+                                {{task}}
+                            </td>
+                        </tr>
+                        <tr v-if="wunder_today.more"><td>...</td></tr>
+                    </tbody>
+                </table>
+            </span>
+        </div>
+        <div class="lo-widget">
+            <span class="lo-widget-title">
+                TODO Dom
+            </span>
+            <span class="lo-widget-content-list">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr v-for="task in wunder_todo_dom.list">
+                            <td>
+                                {{task}}
+                            </td>
+                        </tr>
+                        <tr v-if="wunder_todo_dom.more"><td>...</td></tr>
+                    </tbody>
+                </table>
+            </span>
+        </div>
+    </div>
+    <div class="lo-widgets-grid">
+        <div class="lo-widget lo-widget-middle">
             <span class="lo-top-row">
                 <span>{{day_info.date}}</span>
             </span>
@@ -31,7 +98,7 @@
                 </span>
             </span>
         </div>
-        <div class="lo-widget">
+        <div class="lo-widget lo-widget-middle">
             <span class="lo-top-row">
                 <span>Wewnątrz</span>
             </span>
@@ -41,7 +108,7 @@
                 <span class="lo-humidex-timestamp">{{ humidex.timestamp }}</span>
             </span>
         </div>
-        <div class="lo-widget">
+        <div class="lo-widget lo-widget-middle">
             <span class="lo-top-row">
                 <span>Na zewnątrz</span>
             </span>
@@ -52,6 +119,7 @@
             </span>
         </div>
     </div>
+
 </div>
 
 </body>

@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import schedule
 import config
 import threading
-import time
 import datetime
 import utils
 from multiprocessing.pool import ThreadPool
@@ -52,33 +50,10 @@ class HumidexData(object):  # TODO: move to separated module
         }
 
 
-class HumidexUpdator(threading.Thread):
-    def __init__(self, slo):
-        threading.Thread.__init__(self)
-        self.daemon = True
-        schedule.every(
-            config.INTERVAL_GET_HUMIDEX_FROM_SENSOR_MIN).minutes.do(
-                slo.fetch_current_humidex_from_sensors)
-        schedule.every(
-            config.INTERVAL_SQUEEZE_HUMID_FROM_SHALLOW_CACHE_H).hours.do(
-                slo.squeeze_shallow_cache_to_avg)
-        schedule.every(
-            config.INTERVAL_FLUSH_CACHE_TO_DB_H).hours.do(
-                slo.flush_cache_to_db
-            )
-        self.start()
-
-    def run(self):
-        while True:
-            schedule.run_pending()
-            time.sleep(config.INTERVAL_HUMIDEX_UPDATOR_SCHEDULER_SLEEP_S)
-
-
 class HumidexSLO(object):
     def __init__(self, humidexDevicesFacade, humidexDb):
         print("creating")
         self.workers_pool = ThreadPool(processes=2)
-        self.updator = HumidexUpdator(self)
         self.humidex_devices_facade = humidexDevicesFacade
         self.humidex_db = humidexDb
         self.avg_cache = []
@@ -88,13 +63,11 @@ class HumidexSLO(object):
         self.fetch_current_humidex_from_sensors()
 
     def get_last(self):
-        # TODO: lock needed relly?
-        with self.lock:
-            if len(self.shallow_cache) > 0:
-                return self.shallow_cache[-1]
-            elif len(self.avg_cache) > 0:
-                return self.avg_cache[-1]
-            return None
+        if len(self.shallow_cache) > 0:
+            return self.shallow_cache[-1]
+        elif len(self.avg_cache) > 0:
+            return self.avg_cache[-1]
+        return None
 
     def get_last_24h(self):
         max_last_entries_number = \

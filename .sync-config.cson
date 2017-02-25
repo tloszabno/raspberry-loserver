@@ -4,7 +4,7 @@ remote:
   path: "raspberry-loserver"
   port: "22"
 behaviour:
-  uploadOnSave: true
+  uploadOnSave: false
   syncDownOnOpen: true
   forgetConsole: false
   autoHideConsole: true
