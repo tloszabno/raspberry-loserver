@@ -8,44 +8,23 @@
 </head>
 <body>
 <style>
-.lo-widget .lo-widget-title{
-    vertical-align: top;
-    background-color: #424242;
-    display: block;
-    border-radius: 5px;
-    padding: 4px;
-    font-size: 1.2em;
-    text-align: left;
-    margin: 5px;
-    font-weight: bold;
-    overflow: hidden;
-}
-.lo-widget .lo-widget-content-list{
-    display: block;
-    padding: 5px;
-    margin: 5px;
-    border-radius: 5px;
-    font-size: 1.2em;
-    height: 80%;
-    overflow-y: auto;
-}
-.table-striped>tbody>tr:nth-child(odd)>td,
-.table-striped>tbody>tr:nth-child(odd)>th {
-   background-color: #263238;
- }
+.lo-humidex-led{
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      float: left;
 
- .table-striped>tbody>tr:nth-child(even)>td,
- .table-striped>tbody>tr:nth-child(even)>th {
-    background-color: #37474F;
   }
-.table-striped>tbody>tr>td{
-    color: #CFD8DC;
-    border-top:none;
-}
-.carousel-inner > .item > img, .carousel-inner > .item  {
-    width: 100%;
-    height: 100%
-}
+  .lo-humidex-led-danger{
+      background-color: #AD1457;
+      box-shadow: 0 0 0 5px #AD1457;
+  }
+  .lo-humidex-led-ok{
+      background-color: #00C853;
+      box-shadow: 0 0 0 5px #00C853;
+  }
 </style>
 <div id="losite" v-cloak>
 
@@ -78,6 +57,8 @@
                         <span class="lo-bottom-row">
                             <span class="lo-humidity">H: {{ humidex.int_humid }}%</span>
                             <span class="lo-humidex-timestamp">{{ humidex.timestamp }}</span>
+                            <div v-bind:class="[humidex.int_humid_ok ? 'lo-humidex-led-ok' : 'lo-humidex-led-danger']" class="lo-humidex-led">
+                            </div>
                         </span>
                     </div>
                     <div class="lo-widget lo-widget-middle">

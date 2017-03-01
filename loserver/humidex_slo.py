@@ -46,8 +46,12 @@ class HumidexData(object):  # TODO: move to separated module
             "out_humid": "%.f" % self.outdoor_data[1],
             "int_temp": "%.1f" % self.indoor_data[0],
             "int_humid": "%.0f" % self.indoor_data[1],
-            "timestamp": self.timestamp.strftime('%Y-%m-%d %H:%M')
+            "timestamp": self.timestamp.strftime('%Y-%m-%d %H:%M'),
+            "int_humid_ok": self.is_humid_ok(self.indoor_data[1])
         }
+
+    def is_humid_ok(self, humidity):
+        return (humidity >= 40.0 and humidity <= 90.0)
 
 
 class HumidexSLO(object):
