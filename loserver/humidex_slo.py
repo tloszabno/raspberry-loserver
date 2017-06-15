@@ -56,7 +56,6 @@ class HumidexData(object):  # TODO: move to separated module
 
 class HumidexSLO(object):
     def __init__(self, humidexDevicesFacade, humidexDb):
-        print("creating")
         self.workers_pool = ThreadPool(processes=2)
         self.humidex_devices_facade = humidexDevicesFacade
         self.humidex_db = humidexDb
@@ -87,17 +86,20 @@ class HumidexSLO(object):
         return filter(lambda x: x.timestamp > data_24h_min, local_and_db)
 
     def fetch_current_humidex_from_sensors(self):
-        async_out_data = self.workers_pool.apply_async(
-            self.humidex_devices_facade.get_humidex_outdoor, ())
-        async_in_data = self.workers_pool.apply_async(
-            self.humidex_devices_facade.get_humidex_indoor, ())
-        data_outdoor = async_out_data.get()
-        data_indoor = async_in_data.get()
-        with self.lock:
-            self.shallow_cache.append(
-                HumidexData(
-                    indoor_data=data_indoor, outdoor_data=data_outdoor))
-        self.print_shallow()
+        try:
+            async_out_data = self.workers_pool.apply_async(
+                self.humidex_devices_facade.get_humidex_outdoor, ())
+            async_in_data = self.workers_pool.apply_async(
+                self.humidex_devices_facade.get_humidex_indoor, ())
+            data_outdoor = async_out_data.get()
+            data_indoor = async_in_data.get()
+            with self.lock:
+                self.shallow_cache.append(
+                    HumidexData(
+                        indoor_data=data_indoor, outdoor_data=data_outdoor))
+        except Exception as e:
+            print("Error during fetch_current_humidex_from_sensors %s" % str(e))
+        #self.print_shallow()
 
     @utils.timed
     def squeeze_shallow_cache_to_avg(self):
@@ -116,7 +118,7 @@ class HumidexSLO(object):
                 avg.timestamp = self.shallow_cache[-1].timestamp
                 self.avg_cache.append(avg)
                 self.shallow_cache = []
-        self.print_avg_cache()
+        #self.print_avg_cache()
 
     @utils.timed
     def flush_cache_to_db(self):

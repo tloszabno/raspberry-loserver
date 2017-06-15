@@ -14,6 +14,10 @@ import flask
 import sys
 app = Flask(__name__, static_folder='web')
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 humidex = None
 day_info = None
 updator = None

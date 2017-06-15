@@ -1,4 +1,5 @@
 import threading
+import traceback
 
 
 class WunderSLO(object):
@@ -17,6 +18,9 @@ class WunderSLO(object):
 
     def update_cache(self):
         with self.lock:
-            self.today_tasks = self.wunder_facade.get_tasks_for_today()
-            self.todo_dom_tasks = \
-                self.wunder_facade.get_tasks_on_list_by_title('TODO Dom')
+            try:
+                self.today_tasks = self.wunder_facade.get_tasks_for_today()
+                self.todo_dom_tasks = \
+                    self.wunder_facade.get_tasks_on_list_by_title('TODO Dom')
+            except Exception as e:
+                traceback.print_stack()  # TODO: add some common logger

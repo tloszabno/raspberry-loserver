@@ -13,7 +13,7 @@ class HumidexDB(object):
             with open(config.DB_FILE_PATH, "a+") as f:
                 for entry in to_write:
                     e = entry.to_csv()
-                    print("Writing to db entry-> %s" % e)
+                    #print("Writing to db entry-> %s" % e)
                     f.write(e)
                     f.write('\n')
 
