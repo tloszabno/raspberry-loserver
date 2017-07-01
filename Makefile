@@ -14,7 +14,7 @@ test2:
 
 
 run:
-	sudo python2 loserver/app.py >> /home/xbian/loserverlogs.txt 2>&1
+	sudo python2 loserver/app.py >> /home/osmc/loserverlogs.txt 2>&1
 
 
 run-mocked:
