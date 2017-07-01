@@ -14,5 +14,5 @@ class DayInfoWeb(object):
         return {
             'date': date,
             'time': time,
-            'messages': ["No messages"]
+            'messages': ["No messages", "Just smile ;)"]
         }

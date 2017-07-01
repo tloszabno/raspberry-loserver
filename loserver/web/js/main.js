@@ -5,7 +5,8 @@ var app = new Vue({
         day_info:{},
         wunder_today:[],
         wunder_todo_dom:[],
-        errors: []
+        errors: [],
+        caruselPaused: false
     },
     mounted: function() {
         this.fetch();
@@ -55,6 +56,16 @@ var app = new Vue({
             this.fetchDayInfo();
             this.fetchHumidex();
             this.fetchWunderTasks();
+        },
+        pauseCarusel: function(){
+            if( !app.caruselPaused ){
+                $('.carousel').carousel('pause');
+                console.log("pausing");
+            }else{
+                $('.carousel').carousel('cycle');
+                console.log("starting");
+            }
+            app.caruselPaused = !app.caruselPaused;
         }
 
     }
