@@ -30,10 +30,13 @@
       box-shadow: 0 0 0 5px #424242;
   }
   .lo-pause-led{
-    top: -20px;
-    left: 10px;
-    width: 20px;
-    height: 20px;
+    top: -30px;
+    left: 20px;
+    width: 30px;
+    height: 30px;
+  }
+  .lo-pause-led-on{
+    background-color: 263238;
   }
 </style>
 <div id="losite" v-cloak>
@@ -43,7 +46,7 @@
             <div class="item active">
                 <div class="lo-widgets-grid">
                     <div class="lo-widget lo-widget-middle">
-                      <div class="button lo-led lo-led-bck lo-pause-led" v-on:click="pauseCarusel">
+                      <div class="button lo-led lo-led-bck lo-pause-led" v-on:click="pauseCarusel" v-bind:class="[caruselPaused ? 'lo-pause-led-on' : '']" >
                       </div>
                         <span class="lo-top-row">
                             <span>{{day_info.date}}</span>
