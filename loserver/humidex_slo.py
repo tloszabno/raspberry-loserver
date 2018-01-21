@@ -79,6 +79,7 @@ class HumidexSLO(object):
         self.lock = threading.RLock()
         self.once_flushed = False
         self.fetch_current_humidex_from_sensors()
+        self.pm_facade.update_reads()
 
     def get_last(self):
         if len(self.shallow_cache) > 0:
