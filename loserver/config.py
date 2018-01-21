@@ -8,3 +8,7 @@ INTERVAL_REFRESH_WUNDERLIST_TASKS_MIN = 2
 DB_FILE_PATH = "/home/osmc/db/humidex.csv"
 ADAFRUIT_LIB_PATH = "/home/osmc/libs/" + \
     "Adafruit_Python_DHT/examples/AdafruitDHT.py"
+
+
+INTERVAL_TO_REFRESH_PM_SENSORS_M = 30
+SEEP_TIME_BEFORE_MEASUREMENT_OF_PM_M = 5

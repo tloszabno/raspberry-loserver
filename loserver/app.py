@@ -67,22 +67,27 @@ def init(use_mocks):
     if humidex is not None:
         return
     humidexDevicesFacade = None
+    pm_facade = None
     if not use_mocks:
         from devices import HumidexDevicesFacade
         humidexDevicesFacade = HumidexDevicesFacade()
+        from devices import PMSensorDeviceFacade
+        pm_facade = PMSensorDeviceFacade()
     else:
         print("Using mocks")
         from devices_mocks import HumidexDevicesFacadeMock
         humidexDevicesFacade = HumidexDevicesFacadeMock()
+        from devices_mocks import  PMSensorDeviceFacadeMock
+        pm_facade = PMSensorDeviceFacadeMock()
 
     humidexDB = HumidexDB()
-    humidexSLO = HumidexSLO(humidexDevicesFacade, humidexDB)
+    humidexSLO = HumidexSLO(humidexDevicesFacade, pm_facade, humidexDB)
     wunderFacade = WunderFacade()
     wunder_slo = WunderSLO(wunderFacade)
     wunder_web = WunderListWeb(wunder_slo)
     humidex = HumidexWeb(humidexSLO)
     day_info = DayInfoWeb(wunder_slo)
-    updator = Updator(humidexSLO, wunder_slo)
+    updator = Updator(humidexSLO, wunder_slo, pm_facade)
 
 
 if __name__ == '__main__':

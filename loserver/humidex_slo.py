@@ -1,22 +1,25 @@
 #!/usr/bin/env python
 
-import config
-import threading
 import datetime
-import utils
+import threading
 from multiprocessing.pool import ThreadPool
+
+import config
+import utils
 
 
 class HumidexData(object):  # TODO: move to separated module
     def __init__(self, indoor_data=None, outdoor_data=None, csv=None):
         if csv:
             entries = csv.split(",")
-            if len(entries) != 5:
+            if len(entries) != 5 or len(entries) != 7:
                 raise Exception("Wrong format for given csv " + str(csv))
             self.timestamp = datetime.datetime.strptime(
                 entries[0], "%Y-%m-%d %H:%M:%S.%f")
             self.indoor_data = (float(entries[1]), float(entries[2]))
             self.outdoor_data = (float(entries[3]), float(entries[4]))
+            # FIXME: append pm
+
         else:
             self.indoor_data = indoor_data
             self.outdoor_data = outdoor_data
@@ -37,15 +40,23 @@ class HumidexData(object):  # TODO: move to separated module
             str(self.indoor_data[0]),
             str(self.indoor_data[1]),
             str(self.outdoor_data[0]),
-            str(self.outdoor_data[1])
+            str(self.outdoor_data[1]),
+            str(self.indoor_data[2]),
+            str(self.indoor_data[3]),
+            str(self.outdoor_data[2]),
+            str(self.outdoor_data[3])
         )
 
     def to_json(self):
         return {
             "out_temp": "%.1f" % self.outdoor_data[0],
             "out_humid": "%.f" % self.outdoor_data[1],
+            "out_pm10": "%.f" % self.outdoor_data[2],
+            "out_pm25": "%.f" % self.outdoor_data[3],
             "int_temp": "%.1f" % self.indoor_data[0],
             "int_humid": "%.0f" % self.indoor_data[1],
+            "int_pm10": "%.0f" % self.indoor_data[2],
+            "int_pm25": "%.0f" % self.indoor_data[3],
             "timestamp": self.timestamp.strftime('%Y-%m-%d %H:%M'),
             "int_humid_ok": self.is_humid_ok(self.indoor_data[1])
         }
@@ -53,12 +64,16 @@ class HumidexData(object):  # TODO: move to separated module
     def is_humid_ok(self, humidity):
         return (humidity >= 40.0 and humidity <= 90.0)
 
+    def is_pm_ok(self, pm):
+        return pm <= 50.0
+
 
 class HumidexSLO(object):
-    def __init__(self, humidexDevicesFacade, humidexDb):
+    def __init__(self, humidexDevicesFacade, pm_facade, humidexDb):
         self.workers_pool = ThreadPool(processes=2)
         self.humidex_devices_facade = humidexDevicesFacade
         self.humidex_db = humidexDb
+        self.pm_facade = pm_facade
         self.avg_cache = []
         self.shallow_cache = []
         self.lock = threading.RLock()
@@ -81,7 +96,7 @@ class HumidexSLO(object):
         avg = self.avg_cache
         avg.reverse()
         local_and_db = shallow + avg \
-            + self.humidex_db.read_db(max_last_entries_number)
+                       + self.humidex_db.read_db(max_last_entries_number)
         data_24h_min = datetime.datetime.now() - datetime.timedelta(hours=24)
         return filter(lambda x: x.timestamp > data_24h_min, local_and_db)
 
@@ -93,13 +108,16 @@ class HumidexSLO(object):
                 self.humidex_devices_facade.get_humidex_indoor, ())
             data_outdoor = async_out_data.get()
             data_indoor = async_in_data.get()
+            pm_data = self.pm_facade.get()
+            data_indoor += pm_data[0]
+            data_outdoor += pm_data[1]
             with self.lock:
                 self.shallow_cache.append(
                     HumidexData(
                         indoor_data=data_indoor, outdoor_data=data_outdoor))
         except Exception as e:
             print("Error during fetch_current_humidex_from_sensors %s" % str(e))
-        #self.print_shallow()
+        # self.print_shallow()
 
     @utils.timed
     def squeeze_shallow_cache_to_avg(self):
@@ -109,16 +127,26 @@ class HumidexSLO(object):
                     [x.outdoor_data[0] for x in self.shallow_cache])
                 out_humi_avg = utils.avg(
                     [x.outdoor_data[1] for x in self.shallow_cache])
+                out_pm10_avg = utils.avg(
+                    [x.outdoor_data[2] for x in self.shallow_cache])
+                out_pm25_avg = utils.avg(
+                    [x.outdoor_data[3] for x in self.shallow_cache])
                 in_temp_avg = utils.avg(
                     [x.indoor_data[0] for x in self.shallow_cache])
                 in_humi_avg = utils.avg(
                     [x.indoor_data[1] for x in self.shallow_cache])
+                in_pm10_avg = utils.avg(
+                    [x.indoor_data[2] for x in self.shallow_cache])
+                in_pm25_avg = utils.avg(
+                    [x.indoor_data[3] for x in self.shallow_cache])
+
                 avg = HumidexData(
-                    (in_temp_avg, in_humi_avg), (out_temp_avg, out_humi_avg))
+                    (in_temp_avg, in_humi_avg, in_pm10_avg, in_pm25_avg),
+                    (out_temp_avg, out_humi_avg, out_pm10_avg, out_pm25_avg))
                 avg.timestamp = self.shallow_cache[-1].timestamp
                 self.avg_cache.append(avg)
                 self.shallow_cache = []
-        #self.print_avg_cache()
+        # self.print_avg_cache()
 
     @utils.timed
     def flush_cache_to_db(self):
