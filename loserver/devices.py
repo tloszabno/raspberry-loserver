@@ -2,9 +2,9 @@
 import threading
 import time
 import traceback
+import serial
 from multiprocessing.pool import ThreadPool
 from subprocess import check_output
-
 import RPi.GPIO as gpio
 import requests
 
@@ -66,32 +66,27 @@ class PMSensorDeviceFacade(object):
         self.__setup_gpio__()
 
     def update_reads(self):
-        print("invoking async __read_pm_sensor__")
         self.workers_pool.apply_async(self.__read_pm_sensor__, ())
 
     def get(self):
         return self.inside, self.outside
 
     def __read_pm_sensor__(self):
-        print("__read_pm_sensor__, turning on sensor")
         gpio.output(PM_SENSOR_BOARD_PIN, True)  # turn on pm sensor
         try:
-            time.sleep(SEEP_TIME_BEFORE_MEASUREMENT_OF_PM_M)
+            time.sleep(SEEP_TIME_BEFORE_MEASUREMENT_OF_PM_M * 60)
             t = serial.Serial(PM_SENSOR_PORT, 9600)
             from_sensor = None
             for i in range(3):  # take 3 reads before save
                 from_sensor = getPM(t)
                 time.sleep(1)
-            print("got from sensor %s" % str(from_sensor))
             from_airly = getFromAirly()
-            print("got from airly %s" % str(from_airly))
             with self.lock:
                 self.inside = from_sensor
                 self.outside = from_airly
         except Exception as e:
-            traceback.print_stack()
+            print(str(traceback.format_exc()))
         finally:
-            print("turning off sensor")
             gpio.output(PM_SENSOR_BOARD_PIN, False)  # turn on pm sensor
 
     def __setup_gpio__(self):
