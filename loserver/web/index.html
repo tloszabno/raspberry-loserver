@@ -8,46 +8,74 @@
 </head>
 <body>
 <style>
-.lo-led{
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      position: relative;
-      display: inline-block;
-      float: left;
+    .lo-led {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        position: relative;
+        display: inline-block;
+        float: left;
 
-  }
-  .lo-humidex-led-danger{
-      background-color: #AD1457;
-      box-shadow: 0 0 0 5px #AD1457;
-  }
-  .lo-humidex-led-ok{
-      background-color: #00C853;
-      box-shadow: 0 0 0 5px #00C853;
-  }
-  .lo-led-bck{
-      background-color: #424242;
-      box-shadow: 0 0 0 5px #424242;
-  }
-  .lo-pause-led{
-    top: -30px;
-    left: 20px;
-    width: 30px;
-    height: 30px;
-  }
-  .lo-pause-led-on{
-    background-color: 263238;
-  }
+    }
+
+    .lo-humidex-led-danger {
+        background-color: #AD1457;
+        box-shadow: 0 0 0 5px #AD1457;
+    }
+
+    .lo-humidex-led-ok {
+        background-color: #00C853;
+        box-shadow: 0 0 0 5px #00C853;
+    }
+
+    .lo-led-bck {
+        background-color: #424242;
+        box-shadow: 0 0 0 5px #424242;
+    }
+
+    .lo-pause-led {
+        top: -30px;
+        left: 20px;
+        width: 30px;
+        height: 30px;
+    }
+
+    .lo-pause-led-on {
+        background-color: 263238;
+    }
+
+    .lo-widget .lo-bottom-row .lo-pm {
+        font-size: 2.5em;
+        display: block;
+        min-height: 40px;
+        position: absolute;
+        left: 12px;
+        padding: 2px;
+        margin: auto;
+        top: 32px;
+    }
+
+    .lo-widget .lo-bottom-row .lo-pm2 {
+        font-size: 2.5em;
+        display: block;
+        min-height: 40px;
+        position: absolute;
+        left: 12px;
+        padding: 2px;
+        margin: auto;
+        top: 64px;
+    }
 </style>
 <div id="losite" v-cloak>
 
     <div class="lo-carousel carousel slide" data-ride="carousel">
-          <div class="carousel-inner" role="listbox">
+        <div class="carousel-inner" role="listbox">
             <div class="item active">
                 <div class="lo-widgets-grid">
                     <div class="lo-widget lo-widget-middle">
-                      <div class="button lo-led lo-led-bck lo-pause-led" v-on:click="pauseCarusel" v-bind:class="[caruselPaused ? 'lo-pause-led-on' : '']" >
-                      </div>
+                        <div class="button lo-led lo-led-bck lo-pause-led" v-on:click="pauseCarusel"
+                             v-bind:class="[caruselPaused ? 'lo-pause-led-on' : '']">
+                        </div>
                         <span class="lo-top-row">
                             <span>{{day_info.date}}</span>
                         </span>
@@ -70,9 +98,12 @@
                         </span>
                         <span class="lo-center-row">{{ humidex.int_temp }}&deg;C</span>
                         <span class="lo-bottom-row">
-                            <span class="lo-humidity">H: {{ humidex.int_humid }}%</span>
+                            <span class="lo-humidity">Humid: {{ humidex.int_humid }}%</span>
+                            <span class="lo-pm">Pm10:&nbsp;&nbsp;{{ humidex.int_pm10 }}</span>
+                            <span class="lo-pm2"> Pm2.5: {{ humidex.int_pm25 }}</span>
                             <span class="lo-humidex-timestamp">{{ humidex.timestamp }}</span>
-                            <div v-bind:class="[humidex.int_humid_ok ? 'lo-humidex-led-ok' : 'lo-humidex-led-danger']" class="lo-led">
+                            <div v-bind:class="[humidex.int_humid_ok ? 'lo-humidex-led-ok' : 'lo-humidex-led-danger']"
+                                 class="lo-led">
                             </div>
                         </span>
                     </div>
@@ -82,7 +113,9 @@
                         </span>
                         <span class="lo-center-row">{{ humidex.out_temp }}&deg;C</span>
                         <span class="lo-bottom-row">
-                            <span class="lo-humidity">H: {{ humidex.out_humid }}%</span>
+                            <span class="lo-humidity">Humid:           {{ humidex.out_humid }}%</span>
+                            <span class="lo-pm">Pm10:&nbsp;&nbsp;{{ humidex.out_pm10 }}</span>
+                            <span class="lo-pm2">Pm2.5:        {{ humidex.out_pm25 }}</span>
                             <span class="lo-humidex-timestamp">{{ humidex.timestamp }}</span>
                         </span>
                     </div>
@@ -127,7 +160,7 @@
                 </div>
 
             </div>
-          </div>
+        </div>
     </div>
 </div>
 
