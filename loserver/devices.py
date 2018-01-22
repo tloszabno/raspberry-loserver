@@ -66,23 +66,31 @@ class PMSensorDeviceFacade(object):
         self.__setup_gpio__()
 
     def update_reads(self):
+        print("invoking async __read_pm_sensor__")
         self.workers_pool.apply_async(self.__read_pm_sensor__, ())
 
     def get(self):
         return self.inside, self.outside
 
     def __read_pm_sensor__(self):
+        print("__read_pm_sensor__, turning on sensor")
         gpio.output(PM_SENSOR_BOARD_PIN, True)  # turn on pm sensor
-        time.sleep(SEEP_TIME_BEFORE_MEASUREMENT_OF_PM_M)
-        t = serial.Serial(PM_SENSOR_PORT, 9600)
-        from_sensor = None
-        for i in range(3):  # take 3 reads before save
-            from_sensor = getPM(t)
-            time.sleep(1)
-        from_airly = getFromAirly()
-        with self.lock:
-            self.inside = from_sensor
-            self.outside = from_airly
+        try:
+            time.sleep(SEEP_TIME_BEFORE_MEASUREMENT_OF_PM_M)
+            t = serial.Serial(PM_SENSOR_PORT, 9600)
+            from_sensor = None
+            for i in range(3):  # take 3 reads before save
+                from_sensor = getPM(t)
+                time.sleep(1)
+            print("got from sensor %s" % str(from_sensor))
+            from_airly = getFromAirly()
+            print("got from airly %s" % str(from_airly))
+            with self.lock:
+                self.inside = from_sensor
+                self.outside = from_airly
+        finally:
+            print("turning off sensor")
+            gpio.output(PM_SENSOR_BOARD_PIN, False)  # turn on pm sensor
 
     def __setup_gpio__(self):
         gpio.setmode(gpio.BOARD)
@@ -111,7 +119,7 @@ def getPM(terminal):
                 pm25 = ord(retstr[2]) + ord(retstr[3]) * 256
                 pm10 = ord(retstr[4]) + ord(retstr[5]) * 256
                 return pm10 / 10.0, pm25 / 10.0
-    return (0.0, 0.0)
+    return 0.0, 0.0
 
 
 def getFromAirly():

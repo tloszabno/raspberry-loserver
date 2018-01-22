@@ -112,6 +112,7 @@ class HumidexSLO(object):
             pm_data = self.pm_facade.get()
             data_indoor += pm_data[0]
             data_outdoor += pm_data[1]
+            print("got pm_data %s" % str(pm_data))
             with self.lock:
                 self.shallow_cache.append(
                     HumidexData(

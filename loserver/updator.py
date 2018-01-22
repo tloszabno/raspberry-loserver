@@ -21,11 +21,11 @@ class Updator(threading.Thread):
             humidex_slo.flush_cache_to_db
         )
         schedule.every(
+            config.INTERVAL_TO_REFRESH_PM_SENSORS_M).minutes.do(pm_facade.update_reads)
+        schedule.every(
             config.INTERVAL_REFRESH_WUNDERLIST_TASKS_MIN).minutes.do(
             wunderlist_slo.update_cache
         )
-        schedule.every(
-            config.INTERVAL_TO_REFRESH_PM_SENSORS_M).minutes.do(pm_facade.update_reads)
         self.start()
 
     def run(self):
