@@ -88,6 +88,8 @@ class PMSensorDeviceFacade(object):
             with self.lock:
                 self.inside = from_sensor
                 self.outside = from_airly
+        except Exception as e:
+            traceback.print_stack()
         finally:
             print("turning off sensor")
             gpio.output(PM_SENSOR_BOARD_PIN, False)  # turn on pm sensor
