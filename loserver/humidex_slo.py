@@ -12,7 +12,7 @@ class HumidexData(object):  # TODO: move to separated module
     def __init__(self, indoor_data=None, outdoor_data=None, csv=None):
         if csv:
             entries = csv.split(",")
-            if len(entries) != 5 or len(entries) != 7:
+            if len(entries) != 5 or len(entries) != 9:
                 raise Exception("Wrong format for given csv " + str(csv))
             self.timestamp = datetime.datetime.strptime(
                 entries[0], "%Y-%m-%d %H:%M:%S.%f")
@@ -35,7 +35,7 @@ class HumidexData(object):  # TODO: move to separated module
         pass
 
     def to_csv(self):
-        return "%s,%s,%s,%s,%s" % (
+        return "%s,%s,%s,%s,%s,%s,%s,%s,%s," % (
             str(self.timestamp),
             str(self.indoor_data[0]),
             str(self.indoor_data[1]),
